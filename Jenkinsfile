@@ -117,6 +117,12 @@ pipeline {
             }
         }
         
+        stage('Check the current branch') {
+            steps {
+                sh 'echo "Current branch is ${GIT_BRANCH}"'
+            }
+        }
+
         stage('Deploy to Production') {
             when {
                 branch 'master'
