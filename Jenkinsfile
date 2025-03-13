@@ -1,6 +1,6 @@
 pipeline {
     environment {
-        DOCKER_ID = "a-farsi"
+        DOCKER_ID = "afarsi"
         DOCKER_CAST_IMAGE = "cast-service"
         DOCKER_MOVIE_IMAGE = "movie-service"
         DOCKER_TAG = "v.${BUILD_ID}.0"
