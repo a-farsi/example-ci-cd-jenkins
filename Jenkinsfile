@@ -49,26 +49,72 @@ pipeline {
             }
             parallel {
                 stage('Deploy to Dev') {
-                    steps {
-                        sh """
-                        kubectl config use-context default
-                        kubectl apply -f charts/ -n dev
-                        """
-                    }
+    		    steps {
+        		script {
+            		    sh '''
+            		    rm -Rf .kube
+	            	    mkdir .kube
+            		    ls
+            		    cat $KUBECONFIG > .kube/config
+            
+            		    # Copie du fichier values.yaml pour modification
+            		    cp charts/values.yaml values.yml
+            		    cat values.yml
+
+            		    # Mise à jour du tag d'image dans values.yml
+            		    sed -i "s+tag:.*+tag: ${DOCKER_TAG}+g" values.yml
+            
+            		    # Déploiement avec Helm sur le namespace dev
+            		   helm upgrade --install my-app charts/ --values=values.yml --namespace dev --create-namespace
+            		   '''
+                       }
+                   }
                 }
                 stage('Deploy to QA') {
-                    steps {
-                        sh """
-                        kubectl apply -f charts/ -n qa
-                        """
-                    }
+                   steps {
+                        script {
+                            sh '''
+                            rm -Rf .kube
+                            mkdir .kube
+                            ls
+                            cat $KUBECONFIG > .kube/config
+
+                            # Copie du fichier values.yaml pour modification
+                            cp charts/values.yaml values.yml
+                            cat values.yml
+
+                            # Mise à jour du tag d'image dans values.yml
+                            sed -i "s+tag:.*+tag: ${DOCKER_TAG}+g" values.yml
+
+                            # Déploiement avec Helm sur le namespace dev
+                           helm upgrade --install my-app charts/ --values=values.yml --namespace qa --create-namespace
+                           '''
+                       }
+                   }
+
                 }
                 stage('Deploy to Staging') {
-                    steps {
-                        sh """
-                        kubectl apply -f charts/ -n staging
-                        """
-                    }
+                   steps {
+                        script {
+                            sh '''
+                            rm -Rf .kube
+                            mkdir .kube
+                            ls
+                            cat $KUBECONFIG > .kube/config
+
+                            # Copie du fichier values.yaml pour modification
+                            cp charts/values.yaml values.yml
+                            cat values.yml
+
+                            # Mise à jour du tag d'image dans values.yml
+                            sed -i "s+tag:.*+tag: ${DOCKER_TAG}+g" values.yml
+
+                            # Déploiement avec Helm sur le namespace dev
+                           helm upgrade --install my-app charts/ --values=values.yml --namespace staging --create-namespace
+                           '''
+                       }
+                   }
+
                 }
             }
         }
@@ -81,9 +127,22 @@ pipeline {
                 timeout(time: 15, unit: "MINUTES") {
                     input message: 'Do you want to deploy in production?', ok: 'Deploy'
                 }
-                sh """
-                kubectl apply -f charts/ -n prod
-                """
+                sh '''
+                rm -Rf .kube
+                mkdir .kube
+                ls
+                cat $KUBECONFIG > .kube/config
+
+                # Copie du fichier values.yaml pour modification
+                cp charts/values.yaml values.yml
+                cat values.yml
+
+                # Mise à jour du tag d'image dans values.yml
+                sed -i "s+tag:.*+tag: ${DOCKER_TAG}+g" values.yml
+
+                # Déploiement avec Helm sur le namespace dev
+                helm upgrade --install my-app charts/ --values=values.yml --namespace prod --create-namespace
+                '''
             }
         }
     }
